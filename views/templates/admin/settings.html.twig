@@ -1,0 +1,121 @@
+{# Ekran modułu w stylistyce silnika: ten sam layout, te same makra pól. #}
+{% extends '@Modules/quince_engine/views/templates/admin/layout.html.twig' %}
+{% import '@Modules/quince_engine/views/templates/admin/_macros/icons.html.twig' as icons %}
+{% import '@Modules/quince_engine/views/templates/admin/_macros/fields.html.twig' as fields %}
+
+{% trans_default_domain 'Modules.Quincedictionaries.Admin' %}
+
+{% block quince_intro %}
+    <div class="qc-alert qc-alert-info">
+        {{ icons.icon('info', 18, 'qc-alert-icon') }}
+        <div>
+            {{ 'Dictionaries describe products with data kept outside the shop: vehicle fitment, OEM numbers, engine codes. The structure and the entries are sent to the shop through the API, and the shop shows them on the product page.'|trans }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block quince_actions %}
+    <button type="submit" form="quince-dictionaries" class="qc-btn qc-btn-primary">
+        {{ icons.icon('check', 14) }} {{ 'Save changes'|trans }}
+    </button>
+{% endblock %}
+
+{% block quince_body %}
+{# Osobny formularz dla działania, które nie zapisuje ustawień. #}
+<form id="quince-dictionaries-resolve" method="post" action="{{ path('quince_dictionaries_resolve') }}" hidden>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('quince_dictionaries_resolve') }}">
+</form>
+
+<form id="quince-dictionaries" method="post" action="{{ path('quince_dictionaries_save') }}" class="qc-stack">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('quince_dictionaries_save') }}">
+
+    {# ── 1. Co sklep ma u siebie ── #}
+    <div class="qc-card">
+        <div class="qc-card-head">
+            <div>
+                <div class="qc-card-title">{{ 'Dictionaries in this shop'|trans }}</div>
+                <div class="qc-card-desc">{{ 'What has been received through the API and when.'|trans }}</div>
+            </div>
+            <button type="submit" form="quince-dictionaries-resolve" class="qc-btn qc-btn-outline">
+                {{ icons.icon('refresh', 14) }} {{ 'Match links to products by SKU'|trans }}
+            </button>
+        </div>
+
+        <div class="qc-card-body">
+            {% if dictionaries is empty %}
+                <div class="qc-hint">{{ 'No dictionary yet. A dictionary appears here once it is sent to the shop through the API.'|trans }}</div>
+            {% else %}
+                <table class="qc-table">
+                    <thead>
+                        <tr>
+                            <th>{{ 'Dictionary'|trans }}</th>
+                            <th>{{ 'Levels'|trans }}</th>
+                            <th>{{ 'Entries'|trans }}</th>
+                            <th>{{ 'Links to products'|trans }}</th>
+                            <th>{{ 'Last received'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for slownik in dictionaries %}
+                            <tr>
+                                <td>
+                                    {{ slownik.name }}
+                                    <div class="qc-hint">{{ slownik.key }}{% if slownik.source == 'manual' %} · {{ 'entered in the shop'|trans }}{% endif %}</div>
+                                </td>
+                                <td>{{ slownik.levels }}</td>
+                                <td>{{ slownik.entries }}</td>
+                                <td>{{ slownik.links }}</td>
+                                <td>
+                                    {% if slownik.sync %}
+                                        {{ slownik.sync.date_add|date('d.m.Y H:i') }}
+                                        <div class="qc-hint">
+                                            {{ 'entries'|trans }}: {{ slownik.sync.entries }} ·
+                                            {{ 'links'|trans }}: {{ slownik.sync.links }}
+                                            {% if slownik.sync.status != 'ok' %} · {{ slownik.sync.message }}{% endif %}
+                                        </div>
+                                    {% else %}
+                                        {{ 'never'|trans }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ── 2. Co klient widzi ── #}
+    <div class="qc-card">
+        <div class="qc-card-head">
+            <div>
+                <div class="qc-card-title">{{ 'What the customer sees'|trans }}</div>
+                <div class="qc-card-desc">{{ 'Every link carries a role: what it means that this product is tied to this entry. Each role is a separate table on the product page.'|trans }}</div>
+            </div>
+        </div>
+
+        <div class="qc-card-body qc-stack">
+            {% if roles is empty %}
+                <div class="qc-hint">{{ 'Roles appear together with the links, so there is nothing to set yet.'|trans }}</div>
+            {% else %}
+                <div class="qc-field">
+                    <label class="qc-label">{{ 'Roles shown on the product page'|trans }}</label>
+                    <input type="hidden" name="ROLES_SUBMITTED" value="1">
+
+                    <div class="qc-stack" style="gap:6px">
+                        {% for rola in roles %}
+                            <label style="display:flex; gap:8px; align-items:center">
+                                <input type="hidden" name="ROLES_ALL[]" value="{{ rola }}">
+                                <input type="checkbox" class="qc-checkbox" name="ROLES_ON[]" value="{{ rola }}"{{ rola in rolesOff ? '' : ' checked' }}>
+                                <span>{{ rola }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+
+                    <div class="qc-hint">{{ 'Where the section stands on the product page is set in Product page settings.'|trans }}</div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</form>
+{% endblock %}

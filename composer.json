@@ -1,0 +1,23 @@
+{
+    "name": "quinceproject/dictionaries",
+    "description": "Quince Dictionaries: catalogue dictionaries sent through the Admin API and shown on the product page",
+    "type": "prestashop-module",
+    "license": "OSL-3.0",
+    "authors": [
+        {
+            "name": "Quince Project",
+            "email": "quinceproject@proton.me"
+        }
+    ],
+    "require": {
+        "php": ">=8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Quince\\Dictionaries\\": "src/"
+        }
+    },
+    "config": {
+        "prepend-autoloader": false
+    }
+}

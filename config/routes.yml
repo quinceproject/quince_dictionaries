@@ -1,0 +1,28 @@
+# Ekran modułu w panelu silnika.
+#
+# _legacy_controller wskazuje zakładkę silnika, bo moduł bez niego i tak nie działa
+# (zadeklarowana zależność).
+
+quince_dictionaries:
+  path: quince/dictionaries
+  methods: [GET]
+  defaults:
+    _controller: Quince\Dictionaries\Controller\Admin\SettingsController::indexAction
+    _legacy_controller: 'AdminQuince'
+    _legacy_link: 'AdminQuince'
+
+quince_dictionaries_save:
+  path: quince/dictionaries/save
+  methods: [POST]
+  defaults:
+    _controller: Quince\Dictionaries\Controller\Admin\SettingsController::saveAction
+    _legacy_controller: 'AdminQuince'
+    _legacy_link: 'AdminQuince:save'
+
+quince_dictionaries_resolve:
+  path: quince/dictionaries/resolve
+  methods: [POST]
+  defaults:
+    _controller: Quince\Dictionaries\Controller\Admin\SettingsController::resolveAction
+    _legacy_controller: 'AdminQuince'
+    _legacy_link: 'AdminQuince:save'

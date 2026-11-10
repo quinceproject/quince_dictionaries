@@ -1,0 +1,61 @@
+services:
+  _defaults:
+    public: true
+
+    # Te trzy linie są obowiązkowe w każdym naszym module.
+    #
+    # PrestaShop wyszukuje kontrolery modułów wyrażeniem regularnym po treści pliku
+    # (`class X extends FrameworkBundleAdminController`) i dopiero wtedy dokłada im
+    # tagi, dzięki którym Symfony podaje kontrolerowi jego lokalizator usług.
+    # Nasze kontrolery dziedziczą po wspólnej klasie silnika, więc ten wzorzec
+    # nie pasuje — deklarujemy to sami zamiast liczyć na wykrycie.
+    autoconfigure: true
+    autowire: true
+    tags: ['controller.service_arguments']
+
+  Quince\Dictionaries\Controller\Admin\SettingsController:
+    class: Quince\Dictionaries\Controller\Admin\SettingsController
+    arguments:
+      - '@Quince\Dictionaries\Settings\DictionariesSettings'
+      - '@Quince\Dictionaries\Storage\Repository'
+
+  Quince\Dictionaries\Settings\DictionariesSettings:
+    class: Quince\Dictionaries\Settings\DictionariesSettings
+
+  Quince\Dictionaries\Storage\Repository:
+    class: Quince\Dictionaries\Storage\Repository
+
+  Quince\Dictionaries\Sync\Intake:
+    class: Quince\Dictionaries\Sync\Intake
+
+  # Zasoby Admin API rdzeń wczytuje sam z `src/ApiPlatform/Resources`, ale
+  # dostawcę i procesory trzeba zarejestrować jak każdą inną usługę: API Platform
+  # sięga po nie po nazwie klasy.
+  Quince\Dictionaries\ApiPlatform\Provider\DictionaryProvider:
+    class: Quince\Dictionaries\ApiPlatform\Provider\DictionaryProvider
+    tags: ['api_platform.state_provider']
+
+  Quince\Dictionaries\ApiPlatform\Processor\DictionaryProcessor:
+    class: Quince\Dictionaries\ApiPlatform\Processor\DictionaryProcessor
+    arguments:
+      - '@Quince\Dictionaries\Sync\Intake'
+      - '@Quince\Dictionaries\ApiPlatform\Provider\DictionaryProvider'
+    tags: ['api_platform.state_processor']
+
+  Quince\Dictionaries\ApiPlatform\Processor\EntryBatchProcessor:
+    class: Quince\Dictionaries\ApiPlatform\Processor\EntryBatchProcessor
+    arguments:
+      - '@Quince\Dictionaries\Sync\Intake'
+    tags: ['api_platform.state_processor']
+
+  Quince\Dictionaries\ApiPlatform\Processor\LinkBatchProcessor:
+    class: Quince\Dictionaries\ApiPlatform\Processor\LinkBatchProcessor
+    arguments:
+      - '@Quince\Dictionaries\Sync\Intake'
+    tags: ['api_platform.state_processor']
+
+  Quince\Dictionaries\ApiPlatform\Processor\ProductLinksProcessor:
+    class: Quince\Dictionaries\ApiPlatform\Processor\ProductLinksProcessor
+    arguments:
+      - '@Quince\Dictionaries\Sync\Intake'
+    tags: ['api_platform.state_processor']
