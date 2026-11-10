@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en-US" target-language="pl-PL" datatype="plaintext" original="ModulesQuincedictionariesAdmin">
+    <body>
+      <trans-unit id="quince.dictionaries.name">
+        <source>Quince Dictionaries</source>
+        <target>Quince Dictionaries</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.desc">
+        <source>Catalogue dictionaries sent through the Admin API: vehicle fitment, OEM numbers, engine codes. Shows them on the product page. Requires Quince Engine.</source>
+        <target>Słowniki katalogowe przesyłane przez Admin API: dopasowanie do pojazdów, numery OEM, kody silników. Pokazuje je na stronie produktu. Wymaga Quince Engine.</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.uninstall">
+        <source>Uninstalling deletes the dictionaries and their links to products. They come back when the sending system sends them again.</source>
+        <target>Odinstalowanie kasuje słowniki i ich powiązania z produktami. Wrócą, gdy system, który je przysyła, prześle je ponownie.</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.label">
+        <source>Dictionaries</source>
+        <target>Słowniki</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.invalid_token">
+        <source>Invalid security token, please try again.</source>
+        <target>Nieprawidłowy token bezpieczeństwa, spróbuj ponownie.</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.settings_saved">
+        <source>Settings saved.</source>
+        <target>Ustawienia zapisane.</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.rematched">
+        <source>Links matched to products by SKU again.</source>
+        <target>Powiązania ponownie dopasowane do produktów po SKU.</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.intro">
+        <source>Dictionaries describe products with data kept outside the shop: vehicle fitment, OEM numbers, engine codes. The structure and the entries are sent to the shop through the API, and the shop shows them on the product page.</source>
+        <target>Słowniki opisują produkty danymi trzymanymi poza sklepem: dopasowanie do pojazdów, numery OEM, kody silników. Struktura i wpisy trafiają do sklepu przez API, a sklep pokazuje je na stronie produktu.</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.save_changes">
+        <source>Save changes</source>
+        <target>Zapisz zmiany</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.list_title">
+        <source>Dictionaries in this shop</source>
+        <target>Słowniki w tym sklepie</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.list_desc">
+        <source>What has been received through the API and when.</source>
+        <target>Co przyszło przez API i kiedy.</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.rematch">
+        <source>Match links to products by SKU</source>
+        <target>Dopasuj powiązania do produktów po SKU</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.empty">
+        <source>No dictionary yet. A dictionary appears here once it is sent to the shop through the API.</source>
+        <target>Nie ma jeszcze żadnego słownika. Słownik pojawi się tutaj, gdy zostanie przesłany do sklepu przez API.</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.col.dictionary">
+        <source>Dictionary</source>
+        <target>Słownik</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.col.levels">
+        <source>Levels</source>
+        <target>Poziomy</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.col.entries">
+        <source>Entries</source>
+        <target>Wpisy</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.col.links">
+        <source>Links to products</source>
+        <target>Powiązania z produktami</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.col.last_received">
+        <source>Last received</source>
+        <target>Ostatnio odebrano</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.manual">
+        <source>entered in the shop</source>
+        <target>wpisany w sklepie</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.sync.entries">
+        <source>entries</source>
+        <target>wpisy</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.sync.links">
+        <source>links</source>
+        <target>powiązania</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.never">
+        <source>never</source>
+        <target>nigdy</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.front_title">
+        <source>What the customer sees</source>
+        <target>Co widzi klient</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.front_desc">
+        <source>Every link carries a role: what it means that this product is tied to this entry. Each role is a separate table on the product page.</source>
+        <target>Każde powiązanie ma rolę: mówi, co znaczy, że ten produkt jest połączony z tym wpisem. Każda rola to osobna tabela na stronie produktu.</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.roles_empty">
+        <source>Roles appear together with the links, so there is nothing to set yet.</source>
+        <target>Role pojawiają się razem z powiązaniami, więc na razie nie ma czego ustawiać.</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.roles_label">
+        <source>Roles shown on the product page</source>
+        <target>Role pokazywane na stronie produktu</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.position_hint">
+        <source>Where the section stands on the product page is set in Product page settings.</source>
+        <target>Miejsce sekcji na stronie produktu ustawia się na ekranie „Strona produktu”.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

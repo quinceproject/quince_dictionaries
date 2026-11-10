@@ -4,6 +4,12 @@ All notable changes to this module are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the versioning follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2026-11-10
+
+### Added
+
+- Polish translation of every text the module shows, in the back office and in the shop.
+
 ## [0.2.2] - 2026-11-10
 
 First public release.
