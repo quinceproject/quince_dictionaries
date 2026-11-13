@@ -17,8 +17,8 @@ use Db;
  * Odczyt i zapis słowników.
  *
  * Dwa pytania, pod które ta klasa istnieje: „co pasuje do tego produktu"
- * (karta produktu) i „jakie produkty pasują do tego wpisu" (filtrowanie,
- * krok 3 planu). Reszta to zapis idempotentny i podgląd w panelu.
+ * (karta produktu) i „jakie produkty pasują do tego wpisu" (filtrowanie).
+ * Reszta to zapis idempotentny i podgląd w panelu.
  */
 final class Repository
 {
@@ -223,7 +223,7 @@ final class Repository
         return $wynik;
     }
 
-    /** Produkty pasujące do wpisu — pod filtrowanie na listingu (krok 3 planu). */
+    /** Produkty pasujące do wpisu, pod filtrowanie na listingu. */
     public function productsForEntry(int $idDictionary, string $code): array
     {
         $wiersze = Db::getInstance()->executeS(

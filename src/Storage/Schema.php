@@ -22,7 +22,7 @@ use Db;
  * modelu złączyć drzewo wpisów z tabelą pól przy każdym wejściu klienta na
  * kartę. Sklep jest odczytem, nie drugim PIM-em: wpis niesie gotową ścieżkę
  * („Audi › A4 B5 › S4 quattro") i własne pola obok wiersza, a powiązanie jest
- * płaskim wierszem z dwoma indeksami — pod „co pasuje do produktu" i „jakie
+ * płaskim wierszem z dwoma indeksami: pod „co pasuje do produktu" i „jakie
  * produkty pasują do wpisu".
  */
 final class Schema
