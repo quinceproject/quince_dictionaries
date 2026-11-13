@@ -40,7 +40,7 @@ class Quince_Dictionaries extends Module
     {
         $this->name = 'quince_dictionaries';
         $this->tab = 'front_office_features';
-        $this->version = '0.2.3';
+        $this->version = '0.2.4';
         $this->author = 'Quince Project';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = ['min' => '9.0.0', 'max' => '9.99.99'];
