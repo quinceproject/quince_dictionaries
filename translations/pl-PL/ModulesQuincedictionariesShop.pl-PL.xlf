@@ -6,6 +6,18 @@
         <source>Entry</source>
         <target>Pozycja</target>
       </trans-unit>
+      <trans-unit id="quince.dictionaries.shop.search">
+        <source>Search the table</source>
+        <target>Szukaj w tabeli</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.shop.count_of">
+        <source>%name%: %shown% of %total%</source>
+        <target>%name%: %shown% z %total%</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.shop.empty">
+        <source>No entries match “%query%”.</source>
+        <target>Brak pozycji pasujących do „%query%”.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

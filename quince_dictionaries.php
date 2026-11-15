@@ -36,6 +36,9 @@ class Quince_Dictionaries extends Module
     /** Sekcja słownikowa na karcie produktu, w miejscu ustawionym w panelu strony produktu. */
     public const HOOK_PRODUCT = 'displayQuinceDictionaries';
 
+    /** Od ilu wierszy tabela na karcie produktu dostaje wyszukiwarkę (więcej niż tyle). */
+    private const SEARCH_FROM = 10;
+
     public function __construct()
     {
         $this->name = 'quince_dictionaries';
@@ -225,6 +228,7 @@ class Quince_Dictionaries extends Module
 
         $kolumny = array_keys($kolumny);
         $gotowe = [];
+        $liczniki = [];
 
         foreach ($wiersze as $wiersz) {
             $wartosci = [];
@@ -234,16 +238,38 @@ class Quince_Dictionaries extends Module
                 $wartosci[] = is_scalar($wartosc) ? (string) $wartosc : '';
             }
 
+            $slownik = (string) $wiersz['dictionary'];
+
             $gotowe[] = [
                 'path' => $wiersz['path'] !== '' ? $wiersz['path'] : $wiersz['code'],
                 'values' => $wartosci,
+                'dictionary' => $slownik,
             ];
+
+            // Licznik nad tabelą: „Pojazdy: 90". Nazwa pochodzi ze słownika, bo moduł
+            // nie wie, czy pozycje to pojazdy, czy kuchenki. Zapis „nazwa: liczba"
+            // omija odmianę przez liczby, której nazwa ze słownika nie zna.
+            if (!isset($liczniki[$slownik])) {
+                $nazwy = $wiersz['dictionaryNames'];
+                $liczniki[$slownik] = [
+                    'key' => $slownik,
+                    'name' => is_array($nazwy) && $nazwy !== []
+                        ? (string) ($nazwy[$this->context->language->iso_code] ?? reset($nazwy))
+                        : $slownik,
+                    'count' => 0,
+                ];
+            }
+
+            ++$liczniki[$slownik]['count'];
         }
 
         return [
             'role' => $rola,
             'columns' => $kolumny,
             'rows' => $gotowe,
+            'counts' => array_values($liczniki),
+            // Kilka wierszy obejmuje się wzrokiem, wyszukiwarka byłaby tam szumem.
+            'searchable' => count($gotowe) > self::SEARCH_FROM,
         ];
     }
 
