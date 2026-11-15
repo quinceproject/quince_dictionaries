@@ -10,6 +10,10 @@
         <source>Search the table</source>
         <target>Szukaj w tabeli</target>
       </trans-unit>
+      <trans-unit id="quince.dictionaries.shop.clear">
+        <source>Clear search</source>
+        <target>Wyczyść wyszukiwanie</target>
+      </trans-unit>
       <trans-unit id="quince.dictionaries.shop.count_of">
         <source>%name%: %shown% of %total%</source>
         <target>%name%: %shown% z %total%</target>

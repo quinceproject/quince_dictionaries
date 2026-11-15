@@ -30,9 +30,16 @@
     </div>
 
     {if $qdSekcja.searchable}
-      <input class="q-field q-dict__search" type="search" data-q-dict-search
-             placeholder="{l s='Search the table' d='Modules.Quincedictionaries.Shop'}"
-             aria-label="{l s='Search the table' d='Modules.Quincedictionaries.Shop'}">
+      <div class="q-dict__searchbox">
+        <input class="q-field q-dict__search" type="search" data-q-dict-search
+               placeholder="{l s='Search the table' d='Modules.Quincedictionaries.Shop'}"
+               aria-label="{l s='Search the table' d='Modules.Quincedictionaries.Shop'}">
+        {* Krzyżyk motywu (ten sam co `q-modal__close`), nie przeglądarki. *}
+        <button class="q-dict__clear" type="button" data-q-dict-clear hidden
+                aria-label="{l s='Clear search' d='Modules.Quincedictionaries.Shop'}">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/></svg>
+        </button>
+      </div>
     {/if}
 
     <div class="q-table-wrap" data-q-dict-table>
