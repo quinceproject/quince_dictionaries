@@ -11,6 +11,10 @@ declare(strict_types=1);
 
 namespace Quince\Dictionaries\ApiPlatform\Exception;
 
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 /** Przesyłki nie da się przyjąć w całości: zła wersja formatu, za dużo wierszy, zły kształt. Nic nie zapisano. */
 final class InvalidPayloadException extends \RuntimeException
 {

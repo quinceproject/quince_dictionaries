@@ -11,6 +11,10 @@ declare(strict_types=1);
 
 namespace Quince\Dictionaries\ApiPlatform\Processor;
 
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 use Db;
 use Quince\Dictionaries\ApiPlatform\Exception\DictionaryNotFoundException;
 use Quince\Dictionaries\ApiPlatform\Exception\InvalidPayloadException;

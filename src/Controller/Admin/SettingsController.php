@@ -11,6 +11,10 @@ declare(strict_types=1);
 
 namespace Quince\Dictionaries\Controller\Admin;
 
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 use PrestaShopBundle\Security\Attribute\AdminSecurity;
 use Quince\Dictionaries\Settings\DictionariesSettings;
 use Quince\Dictionaries\Storage\Repository;

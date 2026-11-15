@@ -11,6 +11,10 @@ declare(strict_types=1);
 
 namespace Quince\Dictionaries\ApiPlatform\Exception;
 
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 /** Słownika o tym kluczu sklep nie zna. Najpierw trzeba wysłać jego definicję. */
 final class DictionaryNotFoundException extends \RuntimeException
 {

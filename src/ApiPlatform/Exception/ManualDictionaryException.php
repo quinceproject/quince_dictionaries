@@ -11,6 +11,10 @@ declare(strict_types=1);
 
 namespace Quince\Dictionaries\ApiPlatform\Exception;
 
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 /** Słownik prowadzi sklep ręcznie, więc przesyłka przez API go nie nadpisuje. */
 final class ManualDictionaryException extends \RuntimeException
 {
