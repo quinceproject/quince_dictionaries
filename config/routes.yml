@@ -1,14 +1,15 @@
 # Ekran modułu w panelu silnika.
 #
-# _legacy_controller wskazuje zakładkę silnika, bo moduł bez niego i tak nie działa
-# (zadeklarowana zależność).
+# _legacy_controller wskazuje własną zakładkę modułu (`AdminQuinceDictionaries`). Do niej
+# odnoszą się uprawnienia pracownika: atrybuty `#[AdminSecurity]` w kontrolerach
+# sprawdzają prawa do tej zakładki.
 
 quince_dictionaries:
   path: quince/dictionaries
   methods: [GET]
   defaults:
     _controller: Quince\Dictionaries\Controller\Admin\SettingsController::indexAction
-    _legacy_controller: 'AdminQuince'
+    _legacy_controller: 'AdminQuinceDictionaries'
     _legacy_link: 'AdminQuince'
 
 quince_dictionaries_save:
@@ -16,7 +17,7 @@ quince_dictionaries_save:
   methods: [POST]
   defaults:
     _controller: Quince\Dictionaries\Controller\Admin\SettingsController::saveAction
-    _legacy_controller: 'AdminQuince'
+    _legacy_controller: 'AdminQuinceDictionaries'
     _legacy_link: 'AdminQuince:save'
 
 quince_dictionaries_resolve:
@@ -24,5 +25,5 @@ quince_dictionaries_resolve:
   methods: [POST]
   defaults:
     _controller: Quince\Dictionaries\Controller\Admin\SettingsController::resolveAction
-    _legacy_controller: 'AdminQuince'
+    _legacy_controller: 'AdminQuinceDictionaries'
     _legacy_link: 'AdminQuince:save'

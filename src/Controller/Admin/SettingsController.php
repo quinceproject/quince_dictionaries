@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Quince\Dictionaries\Controller\Admin;
 
+use PrestaShopBundle\Security\Attribute\AdminSecurity;
 use Quince\Dictionaries\Settings\DictionariesSettings;
 use Quince\Dictionaries\Storage\Repository;
 use Quince\Engine\Controller\Admin\QuinceController;
@@ -34,6 +35,7 @@ class SettingsController extends QuinceController
     ) {
     }
 
+    #[AdminSecurity("is_granted('read', request.get('_legacy_controller'))", message: 'You do not have permission to view this.')]
     public function indexAction(): Response
     {
         $slowniki = [];
@@ -87,6 +89,7 @@ class SettingsController extends QuinceController
             : [];
     }
 
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'You do not have permission to change this.')]
     public function saveAction(Request $request): RedirectResponse
     {
         if (!$this->isCsrfTokenValid('quince_dictionaries_save', $request->request->get('_csrf_token'))) {
@@ -102,6 +105,7 @@ class SettingsController extends QuinceController
     }
 
     /** Ponowne przypisanie powiązań do produktów po numerze katalogowym. */
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'You do not have permission to change this.')]
     public function resolveAction(Request $request): RedirectResponse
     {
         if (!$this->isCsrfTokenValid('quince_dictionaries_resolve', $request->request->get('_csrf_token'))) {
