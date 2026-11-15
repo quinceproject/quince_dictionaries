@@ -47,6 +47,12 @@ final class ProductLinksProcessor implements ProcessorInterface
         Guard::schemaVersion($data->schemaVersion);
         $slownik = Guard::dictionary($klucz);
 
+        $zaDuzy = Intake::oversizedProduct([['sku' => $sku, 'links' => $data->links]]);
+
+        if ($zaDuzy !== null) {
+            throw new InvalidPayloadException($zaDuzy);
+        }
+
         $wynik = $this->intake->saveLinks(
             (int) $slownik['id_dictionary'],
             $klucz,

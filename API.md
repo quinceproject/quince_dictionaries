@@ -191,8 +191,14 @@ Content-Type: application/json
 ```
 
 At most 5000 links per request in total. A single product with more links (complete sets
-of a few thousand happen) goes alone in one request and is accepted in full. An empty
-`links` removes the product's links.
+of a few thousand happen) goes alone in one request and is accepted in full, up to
+**10 000 links per product**. A product over that limit is refused with `422` and nothing
+in the request is saved; the message names the SKU, the number of links sent and the
+limit. The same limit applies to §5.2. An empty `links` removes the product's links.
+
+The complete set of a product is saved in one database transaction: the old set is
+replaced by the new one in full or not at all. If saving fails, the product keeps its
+previous set and the request ends with an error, so it can be sent again.
 
 Answer `200`:
 

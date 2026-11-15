@@ -45,6 +45,12 @@ final class Intake
     /** Najwięcej powiązań w jednej paczce, chyba że paczka niesie jeden produkt. */
     public const MAX_LINKS = 5000;
 
+    /**
+     * Najwięcej powiązań jednego produktu. Uzgodnione z CEP 2026-11-15: największy
+     * komplet ma dziś niecałe 2000 pozycji, limit zostawia zapas na rozrost słownika.
+     */
+    public const MAX_PRODUCT_LINKS = 10000;
+
     private const MAX_KEY = 64;
 
     /**
@@ -160,6 +166,33 @@ final class Intake
         $this->log($idDictionary, $key, 0, $zapisane, $odrzucone === [] ? 'ok' : 'partial', $this->summary($odrzucone), $cursor);
 
         return ['products' => $produkty, 'saved' => $zapisane, 'rejected' => $odrzucone, 'unmatched' => $bezProduktu];
+    }
+
+    /**
+     * Komunikat dla pierwszego produktu z kompletem ponad limit albo null.
+     *
+     * Sprawdzane przed zapisem czegokolwiek: żądanie z takim produktem odpada
+     * w całości. Komunikat podaje SKU, liczbę powiązań i limit, żeby nadawca
+     * mógł zapisać błąd przy właściwym produkcie.
+     *
+     * @param array<int,mixed> $products
+     */
+    public static function oversizedProduct(array $products): ?string
+    {
+        foreach ($products as $produkt) {
+            $ile = is_array($produkt) && is_array($produkt['links'] ?? null) ? count($produkt['links']) : 0;
+
+            if ($ile > self::MAX_PRODUCT_LINKS) {
+                return sprintf(
+                    'Product %s carries %d links, at most %d per product. Nothing was saved.',
+                    (string) ($produkt['sku'] ?? ''),
+                    $ile,
+                    self::MAX_PRODUCT_LINKS
+                );
+            }
+        }
+
+        return null;
     }
 
     /** Ile powiązań niesie paczka produktów. Liczone przed zapisem, do limitu. */
@@ -376,19 +409,39 @@ final class Intake
                 . '", "' . Schema::SOURCE_SYNC . '", "' . $teraz . '")';
         }
 
-        $db->delete(Schema::LINK, 'id_dictionary = ' . $idDictionary . ' AND sku = "' . pSQL($sku) . '" AND source = "' . Schema::SOURCE_SYNC . '"');
-
         $zapisane = 0;
 
-        // Paczkami po kilkaset wierszy: jeden produkt potrafi nieść prawie dwa
-        // tysiące powiązań, a pojedyncze zapytanie na wiersz to dwa tysiące
-        // podróży do bazy.
-        foreach (array_chunk($wiersze, 500) as $czesc) {
-            $db->execute(
-                'INSERT IGNORE INTO `' . _DB_PREFIX_ . Schema::LINK . '`
-                 (id_dictionary, code, sku, id_product, role, fields, source, date_upd) VALUES ' . implode(', ', $czesc)
-            );
-            $zapisane += (int) $db->Affected_Rows();
+        // Usunięcie starego kompletu i wstawienie nowego w jednej transakcji:
+        // przerwane żądanie (limit czasu, restart serwera, błąd zapytania)
+        // zostawia poprzedni komplet, a nie jego połowę.
+        $db->execute('START TRANSACTION');
+
+        try {
+            if (!$db->delete(Schema::LINK, 'id_dictionary = ' . $idDictionary . ' AND sku = "' . pSQL($sku) . '" AND source = "' . Schema::SOURCE_SYNC . '"')) {
+                throw new \RuntimeException('Saving the links of ' . $sku . ' failed: ' . $db->getMsgError());
+            }
+
+            // Paczkami po kilkaset wierszy: jeden produkt potrafi nieść prawie dwa
+            // tysiące powiązań, a pojedyncze zapytanie na wiersz to dwa tysiące
+            // podróży do bazy.
+            foreach (array_chunk($wiersze, 500) as $czesc) {
+                $wstawione = $db->execute(
+                    'INSERT IGNORE INTO `' . _DB_PREFIX_ . Schema::LINK . '`
+                     (id_dictionary, code, sku, id_product, role, fields, source, date_upd) VALUES ' . implode(', ', $czesc)
+                );
+
+                if (!$wstawione) {
+                    throw new \RuntimeException('Saving the links of ' . $sku . ' failed: ' . $db->getMsgError());
+                }
+
+                $zapisane += (int) $db->Affected_Rows();
+            }
+
+            $db->execute('COMMIT');
+        } catch (\Throwable $e) {
+            $db->execute('ROLLBACK');
+
+            throw $e;
         }
 
         return ['saved' => $zapisane, 'rejected' => $odrzucone, 'idProduct' => $idProduct];

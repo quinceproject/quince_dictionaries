@@ -46,8 +46,14 @@ final class LinkBatchProcessor implements ProcessorInterface
         Guard::schemaVersion($data->schemaVersion);
         $slownik = Guard::dictionary($klucz);
 
-        // Jeden produkt wchodzi zawsze w całości, nawet ponad limit: jego
-        // komplet nie da się podzielić na dwa żądania, bo każde zastępuje
+        $zaDuzy = Intake::oversizedProduct($data->products);
+
+        if ($zaDuzy !== null) {
+            throw new InvalidPayloadException($zaDuzy);
+        }
+
+        // Jeden produkt wchodzi w całości ponad limit paczki (do limitu produktu):
+        // jego komplet nie da się podzielić na dwa żądania, bo każde zastępuje
         // poprzedni komplet.
         if (count($data->products) > 1 && Intake::countLinks($data->products) > Intake::MAX_LINKS) {
             throw new InvalidPayloadException(sprintf(
