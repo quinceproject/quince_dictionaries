@@ -4,6 +4,22 @@ All notable changes to this module are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the versioning follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-11-16
+
+### Added
+
+- Product page: the section heading shows the number of entries in each dictionary,
+  and a table with more than 10 rows gets a search field with a clear button. Needs
+  the Quince theme 0.1.5.
+
+### Changed
+
+- Admin API: a product carries at most 10 000 dictionary links. A request with more
+  is refused with 422 and nothing is saved. The set of links of a product is saved in
+  one transaction: when saving fails, the previous set stays.
+- New module logo: the letter Q in the project gradient.
+- Files in `src/` stop when opened directly instead of through PrestaShop.
+
 ## [0.2.5] - 2026-11-15
 
 ### Security
