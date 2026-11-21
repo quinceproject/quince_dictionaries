@@ -199,8 +199,8 @@ final class Repository
     public function forProduct(int $idProduct): array
     {
         $wiersze = Db::getInstance()->executeS(
-            'SELECT l.role, l.fields AS link_fields, l.sku,
-                    e.code, e.path, e.labels, e.fields AS entry_fields, e.level_key,
+            'SELECT l.role, l.fields AS link_fields, l.sku, l.id_dictionary,
+                    e.code, e.parent_code, e.path, e.labels, e.fields AS entry_fields, e.level_key,
                     d.dict_key, d.names
              FROM `' . _DB_PREFIX_ . Schema::LINK . '` l
              INNER JOIN `' . _DB_PREFIX_ . Schema::ENTRY . '` e
@@ -215,6 +215,9 @@ final class Repository
         foreach (is_array($wiersze) ? $wiersze : [] as $wiersz) {
             $wynik[(string) $wiersz['role']][] = [
                 'code' => (string) $wiersz['code'],
+                'parentCode' => (string) $wiersz['parent_code'],
+                'level' => (string) $wiersz['level_key'],
+                'idDictionary' => (int) $wiersz['id_dictionary'],
                 'path' => (string) $wiersz['path'],
                 'labels' => $this->json((string) $wiersz['labels']),
                 'fields' => $this->json((string) $wiersz['entry_fields']),
@@ -222,6 +225,115 @@ final class Repository
                 'dictionary' => (string) $wiersz['dict_key'],
                 'dictionaryNames' => $this->json((string) $wiersz['names']),
             ];
+        }
+
+        return $wynik;
+    }
+
+    /**
+     * Przodkowie wpisów, potrzebni do rozpisania wiersza na kolumny poziomów.
+     *
+     * Idziemy w górę drzewa po `parent_code`, jedno zapytanie na piętro i słownik,
+     * nie na wiersz: produkt bywa powiązany z prawie dwoma tysiącami pojazdów,
+     * a ich przodkowie w większości się powtarzają.
+     *
+     * @param array<int,array<int,string>> $kody id słownika => kody rodziców
+     *
+     * @return array<int,array<string,array{parent:string,level:string,labels:array}>> id słownika => kod => wpis
+     */
+    public function ancestors(array $kody): array
+    {
+        $wynik = [];
+
+        foreach ($kody as $idDictionary => $doPobrania) {
+            $znane = [];
+            $doPobrania = array_values(array_unique(array_filter(array_map('strval', $doPobrania))));
+
+            // Ogranicznik pięter chroni przed pętlą w źle przysłanym drzewie.
+            for ($pietro = 0; $doPobrania !== [] && $pietro < 20; ++$pietro) {
+                $nastepne = [];
+
+                foreach (array_chunk($doPobrania, 500) as $paczka) {
+                    $wiersze = Db::getInstance()->executeS(
+                        'SELECT code, parent_code, level_key, labels FROM `' . _DB_PREFIX_ . Schema::ENTRY . '`
+                         WHERE id_dictionary = ' . (int) $idDictionary . ' AND retired = 0
+                         AND code IN ("' . implode('","', array_map('pSQL', $paczka)) . '")'
+                    );
+
+                    foreach (is_array($wiersze) ? $wiersze : [] as $wiersz) {
+                        $kod = (string) $wiersz['code'];
+                        $rodzic = (string) $wiersz['parent_code'];
+                        $znane[$kod] = [
+                            'parent' => $rodzic,
+                            'level' => (string) $wiersz['level_key'],
+                            'labels' => $this->json((string) $wiersz['labels']),
+                        ];
+
+                        if ($rodzic !== '' && !isset($znane[$rodzic])) {
+                            $nastepne[$rodzic] = true;
+                        }
+                    }
+                }
+
+                $doPobrania = array_keys(array_diff_key($nastepne, $znane));
+            }
+
+            $wynik[(int) $idDictionary] = $znane;
+        }
+
+        return $wynik;
+    }
+
+    /**
+     * Definicje słowników: poziomy, pola i role, po identyfikatorze.
+     *
+     * @param int[] $ids
+     *
+     * @return array<int,array{levels:array,fields:array,roles:array}>
+     */
+    public function definitions(array $ids): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+
+        if ($ids === []) {
+            return [];
+        }
+
+        $wiersze = Db::getInstance()->executeS(
+            'SELECT * FROM `' . _DB_PREFIX_ . Schema::DICTIONARY . '` WHERE id_dictionary IN (' . implode(',', $ids) . ')'
+        );
+        $wynik = [];
+
+        foreach (is_array($wiersze) ? $wiersze : [] as $wiersz) {
+            $wynik[(int) $wiersz['id_dictionary']] = [
+                'levels' => array_values($this->json((string) $wiersz['levels'])),
+                'fields' => array_values($this->json((string) $wiersz['fields'])),
+                'roles' => array_values($this->json((string) ($wiersz['roles'] ?? ''))),
+            ];
+        }
+
+        return $wynik;
+    }
+
+    /**
+     * Nazwy ról ze wszystkich definicji: klucz roli => nazwy per język.
+     * Ta sama rola w dwóch słownikach: wygrywa pierwsza znaleziona nazwa.
+     *
+     * @return array<string,array<string,string>>
+     */
+    public function roleNames(): array
+    {
+        $wiersze = Db::getInstance()->executeS('SELECT * FROM `' . _DB_PREFIX_ . Schema::DICTIONARY . '` ORDER BY id_dictionary');
+        $wynik = [];
+
+        foreach (is_array($wiersze) ? $wiersze : [] as $wiersz) {
+            foreach ($this->json((string) ($wiersz['roles'] ?? '')) as $rola) {
+                $klucz = is_array($rola) ? (string) ($rola['key'] ?? '') : '';
+
+                if ($klucz !== '' && !isset($wynik[$klucz]) && is_array($rola['names'] ?? null) && $rola['names'] !== []) {
+                    $wynik[$klucz] = $rola['names'];
+                }
+            }
         }
 
         return $wynik;

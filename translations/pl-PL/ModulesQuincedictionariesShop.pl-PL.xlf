@@ -2,9 +2,13 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
   <file source-language="en-US" target-language="pl-PL" datatype="plaintext" original="ModulesQuincedictionariesShop">
     <body>
-      <trans-unit id="quince.dictionaries.shop.entry">
-        <source>Entry</source>
-        <target>Pozycja</target>
+      <trans-unit id="quince.dictionaries.shop.yes">
+        <source>Yes</source>
+        <target>Tak</target>
+      </trans-unit>
+      <trans-unit id="quince.dictionaries.shop.no">
+        <source>No</source>
+        <target>Nie</target>
       </trans-unit>
       <trans-unit id="quince.dictionaries.shop.search">
         <source>Search the table</source>

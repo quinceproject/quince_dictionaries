@@ -68,7 +68,13 @@ final class DictionaryProcessor implements ProcessorInterface
             }
         }
 
-        $this->intake->saveDefinition($klucz, $data->schemaVersion, $data->names, $data->levels, $data->fields);
+        foreach ($data->roles as $rola) {
+            if (!is_array($rola) || trim((string) ($rola['key'] ?? '')) === '') {
+                throw new InvalidPayloadException('Every role needs a "key". Nothing was saved.');
+            }
+        }
+
+        $this->intake->saveDefinition($klucz, $data->schemaVersion, $data->names, $data->levels, $data->fields, $data->roles);
 
         return $this->provider->state($klucz);
     }

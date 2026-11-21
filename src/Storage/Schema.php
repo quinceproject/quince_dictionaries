@@ -55,6 +55,7 @@ final class Schema
             `names` TEXT NULL,
             `levels` TEXT NULL,
             `fields` TEXT NULL,
+            `roles` TEXT NULL,
             `source` ENUM(\'sync\', \'manual\') NOT NULL DEFAULT \'sync\',
             `schema_version` VARCHAR(16) NOT NULL DEFAULT \'\',
             `date_add` DATETIME NOT NULL,
@@ -144,6 +145,24 @@ final class Schema
         }
 
         return (bool) Db::getInstance()->execute('ALTER TABLE `' . $tabela . '` ADD `fields` TEXT NULL AFTER `levels`');
+    }
+
+    /**
+     * Kolumna z nazwami ról powiązań (0.3.1).
+     *
+     * Rola przychodzi przy powiązaniu tylko jako klucz; nazwę, którą widzi klient
+     * jako tytuł tabeli, system wysyłający podaje w definicji słownika.
+     */
+    public static function addRolesColumn(): bool
+    {
+        $tabela = _DB_PREFIX_ . self::DICTIONARY;
+        $jest = Db::getInstance()->executeS('SHOW COLUMNS FROM `' . $tabela . '` LIKE "roles"');
+
+        if (is_array($jest) && $jest !== []) {
+            return true;
+        }
+
+        return (bool) Db::getInstance()->execute('ALTER TABLE `' . $tabela . '` ADD `roles` TEXT NULL AFTER `fields`');
     }
 
     public static function uninstall(): bool

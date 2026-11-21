@@ -43,7 +43,7 @@ class Quince_Dictionaries extends Module
     {
         $this->name = 'quince_dictionaries';
         $this->tab = 'front_office_features';
-        $this->version = '0.3.0';
+        $this->version = '0.3.1';
         $this->author = 'Quince Project';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = ['min' => '9.0.0', 'max' => '9.99.99'];
@@ -187,12 +187,32 @@ class Quince_Dictionaries extends Module
         }
 
         $ustawienia = new DictionariesSettings();
-        $role = (new Repository())->forProduct($idProduct);
+        $repozytorium = new Repository();
+        $role = $repozytorium->forProduct($idProduct);
         $doPokazania = [];
+
+        if ($role === []) {
+            return '';
+        }
+
+        // Definicje i przodków czytamy raz dla całej karty, nie na sekcję.
+        $idsSlownikow = [];
+        $rodzice = [];
+
+        foreach ($role as $wiersze) {
+            foreach ($wiersze as $wiersz) {
+                $idsSlownikow[] = $wiersz['idDictionary'];
+                $rodzice[$wiersz['idDictionary']][] = $wiersz['parentCode'];
+            }
+        }
+
+        $definicje = $repozytorium->definitions($idsSlownikow);
+        $przodkowie = $repozytorium->ancestors($rodzice);
+        $nazwyRol = $repozytorium->roleNames();
 
         foreach ($role as $rola => $wiersze) {
             if ($ustawienia->roleVisible((string) $rola)) {
-                $doPokazania[] = $this->sekcja((string) $rola, $wiersze);
+                $doPokazania[] = $this->sekcja((string) $rola, $wiersze, $definicje, $przodkowie, $nazwyRol[(string) $rola] ?? []);
             }
         }
 
@@ -208,40 +228,112 @@ class Quince_Dictionaries extends Module
     /**
      * Jedna sekcja karty produktu: nagłówki kolumn i wiersze.
      *
-     * Kolumny liczymy z danych, bo każda rola niesie inne pola: przy pojazdach
-     * lata produkcji siedzą na powiązaniu, przy numerach OEM pola stoją przy
-     * samym wpisie. Szablon ma tylko wypisać gotową tabelę.
+     * Najpierw kolumna na każdy poziom słownika (Typ, Marka, Model...), potem pola.
+     * Wartości poziomów to nazwy wpisu i jego przodków w języku sklepu, złożone po
+     * `parent_code`; napisu `path` nie tniemy, bo nazwa może zawierać separator,
+     * a `path` jest tylko w jednym języku. Kolumna poziomu pusta we wszystkich
+     * wierszach znika: produkt powiązany tylko z markami nie pokazuje pustych modeli.
+     * Pola liczymy z danych, bo każda rola niesie inne: przy pojazdach lata produkcji
+     * siedzą na powiązaniu, przy numerach OEM pola stoją przy samym wpisie.
      *
      * @param array<int,array<string,mixed>> $wiersze
+     * @param array<int,array{levels:array,fields:array,roles:array}> $definicje
+     * @param array<int,array<string,array{parent:string,level:string,labels:array}>> $przodkowie
+     * @param array<string,string> $nazwyRoli
      *
      * @return array<string,mixed>
      */
-    private function sekcja(string $rola, array $wiersze): array
+    private function sekcja(string $rola, array $wiersze, array $definicje, array $przodkowie, array $nazwyRoli): array
     {
-        $kolumny = [];
+        // Poziomy w kolejności z definicji, słowniki w kolejności pojawienia się w sekcji.
+        $poziomy = [];
+        $definicjePol = [];
 
         foreach ($wiersze as $wiersz) {
-            foreach (array_merge(array_keys($wiersz['fields']), array_keys($wiersz['linkFields'])) as $pole) {
-                $kolumny[$pole] = true;
+            $definicja = $definicje[$wiersz['idDictionary']] ?? ['levels' => [], 'fields' => []];
+
+            foreach ($definicja['levels'] as $poziom) {
+                $klucz = is_array($poziom) ? (string) ($poziom['key'] ?? '') : (string) $poziom;
+
+                if ($klucz !== '' && !isset($poziomy[$klucz])) {
+                    $poziomy[$klucz] = $this->nazwa(is_array($poziom) ? ($poziom['names'] ?? []) : [], $klucz);
+                }
+            }
+
+            foreach ($definicja['fields'] as $pole) {
+                $klucz = is_array($pole) ? (string) ($pole['key'] ?? '') : '';
+
+                if ($klucz !== '' && !isset($definicjePol[$klucz])) {
+                    $definicjePol[$klucz] = $pole;
+                }
             }
         }
 
-        $kolumny = array_keys($kolumny);
+        // Pola: te z definicji w jej kolejności, nieopisane na końcu.
+        $obecnePola = [];
+
+        foreach ($wiersze as $wiersz) {
+            foreach (array_merge(array_keys($wiersz['fields']), array_keys($wiersz['linkFields'])) as $pole) {
+                $obecnePola[(string) $pole] = true;
+            }
+        }
+
+        $pola = array_merge(
+            array_values(array_filter(array_keys($definicjePol), static fn ($k): bool => isset($obecnePola[$k]))),
+            array_values(array_diff(array_keys($obecnePola), array_keys($definicjePol)))
+        );
+
+        $komorkiPoziomow = [];
+
+        foreach ($wiersze as $i => $wiersz) {
+            $komorkiPoziomow[$i] = $this->poziomyWiersza($wiersz, $przodkowie[$wiersz['idDictionary']] ?? []);
+
+            // Wpis bez poziomu z definicji: ścieżka w pierwszej kolumnie, żeby wiersz nie był pusty.
+            if (array_intersect_key($komorkiPoziomow[$i], $poziomy) === [] && $poziomy !== []) {
+                $komorkiPoziomow[$i] = [array_key_first($poziomy) => $wiersz['path'] !== '' ? $wiersz['path'] : $wiersz['code']];
+            }
+        }
+
+        $poziomy = array_filter(
+            $poziomy,
+            static function ($klucz) use ($komorkiPoziomow): bool {
+                foreach ($komorkiPoziomow as $komorki) {
+                    if (($komorki[$klucz] ?? '') !== '') {
+                        return true;
+                    }
+                }
+
+                return false;
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+
+        $kolumny = array_values($poziomy);
+
+        foreach ($pola as $pole) {
+            $definicja = $definicjePol[$pole] ?? [];
+            $naglowek = $this->nazwa(is_array($definicja['names'] ?? null) ? $definicja['names'] : [], $pole);
+            $jednostka = trim((string) ($definicja['unit'] ?? ''));
+            $kolumny[] = $jednostka !== '' ? $naglowek . ' (' . $jednostka . ')' : $naglowek;
+        }
+
         $gotowe = [];
         $liczniki = [];
 
-        foreach ($wiersze as $wiersz) {
+        foreach ($wiersze as $i => $wiersz) {
             $wartosci = [];
 
-            foreach ($kolumny as $pole) {
-                $wartosc = $wiersz['linkFields'][$pole] ?? $wiersz['fields'][$pole] ?? '';
-                $wartosci[] = is_scalar($wartosc) ? (string) $wartosc : '';
+            foreach (array_keys($poziomy) as $poziom) {
+                $wartosci[] = $komorkiPoziomow[$i][$poziom] ?? '';
+            }
+
+            foreach ($pola as $pole) {
+                $wartosci[] = $this->wartoscPola($wiersz['linkFields'][$pole] ?? $wiersz['fields'][$pole] ?? '');
             }
 
             $slownik = (string) $wiersz['dictionary'];
 
             $gotowe[] = [
-                'path' => $wiersz['path'] !== '' ? $wiersz['path'] : $wiersz['code'],
                 'values' => $wartosci,
                 'dictionary' => $slownik,
             ];
@@ -264,13 +356,82 @@ class Quince_Dictionaries extends Module
         }
 
         return [
-            'role' => $rola,
+            'role' => $this->nazwa($nazwyRoli, $rola),
             'columns' => $kolumny,
             'rows' => $gotowe,
             'counts' => array_values($liczniki),
             // Kilka wierszy obejmuje się wzrokiem, wyszukiwarka byłaby tam szumem.
             'searchable' => count($gotowe) > self::SEARCH_FROM,
         ];
+    }
+
+    /**
+     * Nazwy wpisu i jego przodków po kluczu poziomu, w języku sklepu.
+     *
+     * @param array<string,mixed> $wiersz
+     * @param array<string,array{parent:string,level:string,labels:array}> $przodkowie kod => wpis
+     *
+     * @return array<string,string> klucz poziomu => nazwa
+     */
+    private function poziomyWiersza(array $wiersz, array $przodkowie): array
+    {
+        $komorki = [];
+
+        if ($wiersz['level'] !== '') {
+            $komorki[$wiersz['level']] = $this->nazwa($wiersz['labels'], $wiersz['code']);
+        }
+
+        $kod = $wiersz['parentCode'];
+
+        // Ogranicznik chroni przed pętlą w źle przysłanym drzewie.
+        for ($krok = 0; $kod !== '' && isset($przodkowie[$kod]) && $krok < 20; ++$krok) {
+            $przodek = $przodkowie[$kod];
+
+            if ($przodek['level'] !== '' && !isset($komorki[$przodek['level']])) {
+                $komorki[$przodek['level']] = $this->nazwa($przodek['labels'], $kod);
+            }
+
+            $kod = $przodek['parent'];
+        }
+
+        return $komorki;
+    }
+
+    /**
+     * Napis w języku sklepu z mapy {język: napis}; brak języka sklepu = pierwszy dostępny,
+     * pusta mapa = zapasowy napis (klucz albo kod).
+     *
+     * @param mixed $nazwy
+     */
+    private function nazwa($nazwy, string $zapas): string
+    {
+        if (!is_array($nazwy) || $nazwy === []) {
+            return $zapas;
+        }
+
+        $nazwa = $nazwy[$this->context->language->iso_code] ?? reset($nazwy);
+
+        return is_scalar($nazwa) && (string) $nazwa !== '' ? (string) $nazwa : $zapas;
+    }
+
+    /**
+     * Wartość pola do komórki. Pola tłumaczone i listy wyboru przychodzą jako {język: tekst}.
+     *
+     * @param mixed $wartosc
+     */
+    private function wartoscPola($wartosc): string
+    {
+        if (is_bool($wartosc)) {
+            return $wartosc
+                ? $this->trans('Yes', [], self::DOMENA_SKLEPU)
+                : $this->trans('No', [], self::DOMENA_SKLEPU);
+        }
+
+        if (is_array($wartosc)) {
+            return $this->nazwa($wartosc, '');
+        }
+
+        return is_scalar($wartosc) ? (string) $wartosc : '';
     }
 
     /** Identyfikator produktu z parametru hooka: tablicy z prezentera albo obiektu. */

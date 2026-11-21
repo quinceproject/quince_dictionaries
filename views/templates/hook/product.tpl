@@ -2,11 +2,11 @@
  * Quince Dictionaries: słowniki na karcie produktu.
  *
  * Po jednej tabeli na rolę powiązania: dopasowanie do pojazdów, numery OEM,
- * kody silnika. Nazwa roli jest nagłówkiem, bo to ona niesie znaczenie.
+ * kody silnika. Nazwa roli (z definicji słownika) jest nagłówkiem, bo to ona
+ * niesie znaczenie.
  *
- * Pierwsza kolumna to ścieżka wpisu („Audi › A4 B5 › S4 quattro"), dalej pola
- * powiązania i wpisu. Ścieżka przychodzi gotowa przez API, więc tabela nie odtwarza
- * drzewa słownika.
+ * Najpierw kolumna na każdy poziom słownika (Typ, Marka, Model...), dalej pola
+ * wpisu i powiązania. Nagłówki i komórki składa moduł, szablon tylko je wypisuje.
  *
  * Obok nazwy roli licznik pozycji na każdy słownik („Pojazdy: 90"). Dłuższa tabela
  * dostaje pole wyszukiwania; zawężanie wierszy robi wyspa motywu
@@ -46,7 +46,6 @@
       <table class="q-table">
         <thead>
           <tr>
-            <th scope="col">{l s='Entry' d='Modules.Quincedictionaries.Shop'}</th>
             {foreach from=$qdSekcja.columns item=qdKolumna}
               <th scope="col">{$qdKolumna}</th>
             {/foreach}
@@ -55,7 +54,6 @@
         <tbody>
           {foreach from=$qdSekcja.rows item=qdWiersz}
             <tr data-dictionary="{$qdWiersz.dictionary}">
-              <td>{$qdWiersz.path}</td>
               {foreach from=$qdWiersz.values item=qdWartosc}
                 <td>{$qdWartosc}</td>
               {/foreach}

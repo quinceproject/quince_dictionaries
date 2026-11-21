@@ -107,7 +107,11 @@
                             <label style="display:flex; gap:8px; align-items:center">
                                 <input type="hidden" name="ROLES_ALL[]" value="{{ rola }}">
                                 <input type="checkbox" class="qc-checkbox" name="ROLES_ON[]" value="{{ rola }}"{{ rola in rolesOff ? '' : ' checked' }}>
-                                <span>{{ rola }}</span>
+                                {% if roleNames[rola] is defined %}
+                                    <span>{{ roleNames[rola] }} <span class="qc-hint" style="display:inline">({{ rola }})</span></span>
+                                {% else %}
+                                    <span>{{ rola }}</span>
+                                {% endif %}
                             </label>
                         {% endfor %}
                     </div>

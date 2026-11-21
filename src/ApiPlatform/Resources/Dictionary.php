@@ -86,6 +86,9 @@ class Dictionary
     /** @var array<int,mixed> pola wpisu i powiązania: klucz, typ, zakres, nazwy */
     public array $fields = [];
 
+    /** @var array<int,mixed> role powiązań: klucz i nazwy per język (opcjonalne) */
+    public array $roles = [];
+
     /** Odpowiedź: `sync` (przysłany przez API) albo `manual` (prowadzony w sklepie). */
     public string $source = '';
 

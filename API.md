@@ -73,7 +73,10 @@ Content-Type: application/json
     { "key": "model", "names": { "pl": "Model", "en": "Model" } }
   ],
   "fields": [
-    { "key": "years", "type": "text", "scope": "link", "names": { "en": "Years" } }
+    { "key": "years", "type": "text", "scope": "link", "unit": "", "names": { "en": "Years" } }
+  ],
+  "roles": [
+    { "key": "fitment", "names": { "pl": "Kompatybilność", "en": "Compatibility" } }
   ]
 }
 ```
@@ -81,7 +84,12 @@ Content-Type: application/json
 - `{key}`: lower case letters, digits, `-` and `_`, up to 64 characters. Taken from the
   address only; a `key` in the body is ignored.
 - `levels`: at least one, each with a `key`. Entries are checked against these keys.
-- `names`, `fields`: stored as sent and shown by the shop; the shop does not edit them.
+  On the product page every level is a column headed with its `names`.
+- `fields`: the product page heads each field column with its `names` and its `unit`.
+- `roles` (optional, since 0.3.1): the role keys used in the links, each with `names`.
+  The product page titles the table of a role with its name; a role without a name
+  shows its key. When two dictionaries name the same role, the first one wins.
+- `names`, `levels`, `fields`, `roles`: stored as sent; the shop does not edit them.
 
 Answer `200` with the state of the dictionary (see §6). Sending the same definition again
 replaces the previous one.

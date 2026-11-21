@@ -66,6 +66,7 @@ class SettingsController extends QuinceController
                 'dictionaries' => $slowniki,
                 'roles' => $this->roles(),
                 'rolesOff' => $this->settings->rolesOff(),
+                'roleNames' => $this->roleNames(),
                 'layoutTitle' => 'Dictionaries',
                 'layoutTitleDomain' => self::DOMENA,
                 'quinceRoute' => 'quince_dictionaries',
@@ -91,6 +92,27 @@ class SettingsController extends QuinceController
         return is_array($wiersze)
             ? array_values(array_filter(array_map(static fn (array $w): string => (string) $w['role'], $wiersze)))
             : [];
+    }
+
+    /**
+     * Nazwa roli w języku pracownika, jeśli system wysyłający ją podał.
+     *
+     * @return array<string,string> klucz roli => nazwa
+     */
+    private function roleNames(): array
+    {
+        $jezyk = (string) (\Context::getContext()->language->iso_code ?? '');
+        $wynik = [];
+
+        foreach ((new \Quince\Dictionaries\Storage\Repository())->roleNames() as $klucz => $nazwy) {
+            $nazwa = $nazwy[$jezyk] ?? reset($nazwy);
+
+            if (is_scalar($nazwa) && (string) $nazwa !== '') {
+                $wynik[$klucz] = (string) $nazwa;
+            }
+        }
+
+        return $wynik;
     }
 
     #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'You do not have permission to change this.')]

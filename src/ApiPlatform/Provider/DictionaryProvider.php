@@ -71,6 +71,7 @@ final class DictionaryProvider implements ProviderInterface
         $slownik->names = $this->json($wiersz['names'] ?? '');
         $slownik->levels = array_values($this->json($wiersz['levels'] ?? ''));
         $slownik->fields = array_values($this->json($wiersz['fields'] ?? ''));
+        $slownik->roles = array_values($this->json($wiersz['roles'] ?? ''));
         $slownik->source = (string) $wiersz['source'];
         $slownik->entries = (int) ($wpisy['wszystkie'] ?? 0);
         $slownik->retiredEntries = (int) ($wpisy['wycofane'] ?? 0);

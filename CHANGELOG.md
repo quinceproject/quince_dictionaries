@@ -4,6 +4,29 @@ All notable changes to this module are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the versioning follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-11-21
+
+### Changed
+
+- Product page: one column per dictionary level (for example Type, Make, Model, Engine)
+  instead of one column with the whole path. Column headings are the level names from
+  the definition, in the shop language; the values are the names of the entry and its
+  parents. A level column that is empty in every row of a table is left out.
+- Product page: field columns are headed with the field name from the definition and
+  its unit, instead of the field key.
+- Product page: the table title is the role name, when the definition sends one.
+
+### Added
+
+- Admin API: the dictionary definition accepts optional `roles`, each with a `key` and
+  `names` per language. Without it the product page shows the role key, as before.
+  The module settings show the role name next to its key.
+
+### Fixed
+
+- Product page: field values sent per language (translated fields and choice lists)
+  showed as empty cells. They now show in the shop language.
+
 ## [0.3.0] - 2026-11-16
 
 ### Added

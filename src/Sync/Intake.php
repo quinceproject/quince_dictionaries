@@ -59,8 +59,9 @@ final class Intake
      * @param array<string,mixed> $names
      * @param array<int,mixed> $levels
      * @param array<int,mixed> $fields
+     * @param array<int,mixed> $roles klucz roli i jej nazwy per język; puste = karta pokazuje klucz
      */
-    public function saveDefinition(string $key, string $schemaVersion, array $names, array $levels, array $fields): int
+    public function saveDefinition(string $key, string $schemaVersion, array $names, array $levels, array $fields, array $roles = []): int
     {
         $db = Db::getInstance();
         $teraz = date('Y-m-d H:i:s');
@@ -70,6 +71,7 @@ final class Intake
             'names' => pSQL((string) json_encode($names, JSON_UNESCAPED_UNICODE), true),
             'levels' => pSQL((string) json_encode($levels, JSON_UNESCAPED_UNICODE), true),
             'fields' => pSQL((string) json_encode($fields, JSON_UNESCAPED_UNICODE), true),
+            'roles' => pSQL((string) json_encode($roles, JSON_UNESCAPED_UNICODE), true),
             'schema_version' => pSQL($schemaVersion),
             'source' => Schema::SOURCE_SYNC,
             'date_upd' => $teraz,
