@@ -4,6 +4,15 @@ All notable changes to this module are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the versioning follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-11-21
+
+### Changed
+
+- Product page: a table longer than 100 rows comes with its first 100 rows only. The
+  theme shows the shop pagination under it and loads the next pages from the new
+  `table` front controller; the search field searches the whole table there. Shorter
+  tables load whole and search in the browser, as before. Needs the Quince theme 0.1.13.
+
 ## [0.3.1] - 2026-11-21
 
 ### Changed

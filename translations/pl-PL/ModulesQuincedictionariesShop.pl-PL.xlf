@@ -2,6 +2,10 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
   <file source-language="en-US" target-language="pl-PL" datatype="plaintext" original="ModulesQuincedictionariesShop">
     <body>
+      <trans-unit id="quince.dictionaries.shop.pages">
+        <source>Table pages</source>
+        <target>Strony tabeli</target>
+      </trans-unit>
       <trans-unit id="quince.dictionaries.shop.yes">
         <source>Yes</source>
         <target>Tak</target>

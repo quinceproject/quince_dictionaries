@@ -12,13 +12,23 @@
  * dostaje pole wyszukiwania; zawężanie wierszy robi wyspa motywu
  * `islands/dictionaries.js`, a licznik pokazuje wtedy „Pojazdy: 12 z 90".
  *
+ * Tabela dłuższa niż jedna strona (`paged`) przychodzi tylko pierwszą stroną.
+ * Wyspa rysuje pod nią stronicowanie motywu (`q-pagination`) i dociąga kolejne
+ * strony oraz wyniki wyszukiwania z adresu `data-q-dict-url`.
+ *
  * Wygląd: `q-table` motywu, ta sama tabela co specyfikacja produktu.
  *}
 
 {foreach from=$qdSekcje item=qdSekcja}
   <div class="q-dict"{if $qdSekcja.searchable} data-q-dict
        data-msg-of="{l s='%name%: %shown% of %total%' d='Modules.Quincedictionaries.Shop'}"
-       data-msg-empty="{l s='No entries match “%query%”.' d='Modules.Quincedictionaries.Shop'}"{/if}>
+       data-msg-empty="{l s='No entries match “%query%”.' d='Modules.Quincedictionaries.Shop'}"{/if}{if $qdSekcja.paged}
+       data-q-dict-url="{$qdSekcja.url}"
+       data-pages="{$qdSekcja.pages|intval}"
+       data-msg-next="{l s='Next page' d='Shop.Theme.Actions'}"
+       data-msg-next-label="{l s='Go to next page' d='Shop.Theme.Actions'}"
+       data-msg-page="{l s='Go to page %page%' d='Shop.Theme.Actions'}"
+       data-msg-pages="{l s='Table pages' d='Modules.Quincedictionaries.Shop'}"{/if}>
     <div class="q-dict__head">
       <p class="q-dict__title">{$qdSekcja.role}</p>
       <p class="q-dict__count" aria-live="polite">
@@ -65,6 +75,10 @@
 
     {if $qdSekcja.searchable}
       <p class="q-dict__empty" data-q-dict-empty hidden></p>
+    {/if}
+
+    {if $qdSekcja.paged}
+      <nav class="q-pagination q-dict__pages" data-q-dict-pages hidden></nav>
     {/if}
   </div>
 {/foreach}
